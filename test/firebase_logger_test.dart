@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:advanced_firebase_logger/firebase_logger.dart';
+import 'package:advanced_firebase_logger/advanced_firebase_logger.dart';
 
 void main() {
   group('FirebaseLogger Tests', () {
@@ -36,7 +36,7 @@ void main() {
     test('setMinimumLevel should update minimum level', () {
       FirebaseLogger.setMinimumLevel(LogLevel.warning);
       expect(FirebaseLogger.getMinimumLevel(), LogLevel.warning);
-      
+
       // Reset to default
       FirebaseLogger.setMinimumLevel(LogLevel.info);
     });
