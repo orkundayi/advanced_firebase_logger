@@ -10,6 +10,7 @@ Firebase tabanlı Flutter uygulamaları için geliştirilmiş gelişmiş bir log
 - **Ek veri desteği**: Log mesajlarıyla birlikte ek meta veriler ekleyebilirsiniz
 - **Tag desteği**: Logları kategorilere ayırmak için tag kullanabilirsiniz
 - **Singleton pattern**: Uygulama genelinde tek instance kullanımı
+- **Debug Console Integration**: Loglar hem Firestore'a hem de Flutter debug konsoluna yazılır
 
 ## Başlangıç
 
@@ -25,7 +26,7 @@ Firebase tabanlı Flutter uygulamaları için geliştirilmiş gelişmiş bir log
 
 ```yaml
 dependencies:
-  advanced_firebase_logger: ^0.0.1
+  advanced_firebase_logger: ^0.1.0
   firebase_core: ^3.8.0
   cloud_firestore: ^5.4.4
 ```
@@ -113,6 +114,19 @@ LogLevel currentLevel = FirebaseLogger.getMinimumLevel();
 | SEVERE | 600 | Ciddi hata mesajları |
 | SHOUT | 700 | Kritik/acil durum mesajları |
 
+## Debug Console Integration
+
+Bu paket, logları hem Firebase Firestore'a hem de Flutter debug konsoluna yazdırır. Debug modunda çalışırken, tüm log mesajlarını gerçek zamanlı olarak konsolunuzda görebilirsiniz.
+
+### Debug Console Format
+
+```
+[INFO] 2024-01-15T10:30:45.123Z: Kullanıcı giriş yaptı
+[WARNING] 2024-01-15T10:30:46.456Z [AUTH]: Oturum süresi doldu
+[INFO] 2024-01-15T10:30:47.789Z [USER_ACTION]: Profil güncellendi
+Additional Data: {userId: 12345, action: profile_update}
+```
+
 ## Firestore Veri Yapısı
 
 Loglar aşağıdaki yapıda Firestore'a kaydedilir:
@@ -127,6 +141,44 @@ Loglar aşağıdaki yapıda Firestore'a kaydedilir:
   "additionalData": { /* Ek veriler */ }
 }
 ```
+
+## Example
+
+Bu paketin nasıl kullanılacağını görmek için `example/` klasöründeki örnek uygulamayı inceleyebilirsiniz.
+
+### Example'ı Çalıştırma
+
+**⚠️ IMPORTANT**: Example'ı çalıştırmak için Firebase projesi kurmanız gerekiyor.
+
+#### Hızlı Başlangıç
+
+```bash
+cd example
+flutter pub get
+flutter run
+```
+
+**Not**: Firebase kurulumu yapılmadan example "Demo Mode"da çalışır ve logları sadece debug konsolunda gösterir.
+
+#### Tam Firebase Kurulumu
+
+Detaylı kurulum rehberi için `example/SETUP.md` dosyasını inceleyin. Bu rehber:
+- Firebase projesi oluşturma
+- Cloud Firestore kurulumu
+- Güvenlik kuralları ayarlama
+- Konfigürasyon dosyalarını ekleme
+
+adımlarını içerir.
+
+### Example Özellikleri
+
+Example uygulaması şunları gösterir:
+- Farklı log seviyelerinin kullanımı
+- Tag ve ek veri desteği
+- Minimum log seviyesi değiştirme
+- Debug konsolunda gerçek zamanlı log görüntüleme
+- Firebase bağlantı durumu göstergesi
+- Demo mode desteği (Firebase olmadan da çalışır)
 
 ## Lisans
 

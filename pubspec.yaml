@@ -1,6 +1,6 @@
 name: advanced_firebase_logger
 description: "An advanced Flutter package for logging to Firebase Cloud Firestore with multiple log levels, rich metadata support, and customizable features."
-version: 0.0.1
+version: 0.1.0
 homepage: https://github.com/orkundayi/advanced_firebase_logger
 repository: https://github.com/orkundayi/advanced_firebase_logger
 
