@@ -1,3 +1,10 @@
+## 0.1.1
+
+### 🔧 Hata Düzeltmeleri
+* **Paket Formatı**: Dart formatter uyumluluğu sağlandı
+* **Git Durumu**: Commit edilmemiş dosya sorunları çözüldü
+* **Publish Sorunları**: Paket yayınlama hataları giderildi
+
 ## 0.1.0
 
 ### ✨ Yeni Özellikler
