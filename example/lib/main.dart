@@ -28,7 +28,10 @@ void main() async {
     );
 
     // Initialize FirebaseLogger
-    await FirebaseLogger.initialize(collectionName: 'app_logs', minimumLevel: LogLevel.info);
+    await FirebaseLogger.initialize(
+      collectionName: 'app_logs',
+      minimumLevel: LogLevel.info,
+    );
     firebaseInitialized = true;
 
     runApp(MyApp(firebaseInitialized: firebaseInitialized));
@@ -48,7 +51,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Firebase Logger Example',
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple), useMaterial3: true),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
       home: LoggerDemoPage(firebaseInitialized: firebaseInitialized),
     );
   }
@@ -84,33 +90,43 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
 
             // Log level buttons
             ElevatedButton(
-              onPressed: () => _logMessage(LogLevel.info, 'User logged in successfully'),
+              onPressed: () =>
+                  _logMessage(LogLevel.info, 'User logged in successfully'),
               child: const Text('Log INFO'),
             ),
             const SizedBox(height: 8),
 
             ElevatedButton(
-              onPressed: () => _logMessage(LogLevel.warning, 'User session expired'),
+              onPressed: () =>
+                  _logMessage(LogLevel.warning, 'User session expired'),
               child: const Text('Log WARNING'),
             ),
             const SizedBox(height: 8),
 
             ElevatedButton(
-              onPressed: () => _logMessage(LogLevel.severe, 'Database connection failed'),
+              onPressed: () =>
+                  _logMessage(LogLevel.severe, 'Database connection failed'),
               child: const Text('Log SEVERE'),
             ),
             const SizedBox(height: 8),
 
             ElevatedButton(
-              onPressed: () => _logMessage(LogLevel.fine, 'User clicked button', tag: 'UI'),
+              onPressed: () =>
+                  _logMessage(LogLevel.fine, 'User clicked button', tag: 'UI'),
               child: const Text('Log FINE with Tag'),
             ),
             const SizedBox(height: 8),
 
-            ElevatedButton(onPressed: () => _logMessageWithData(), child: const Text('Log with Additional Data')),
+            ElevatedButton(
+              onPressed: () => _logMessageWithData(),
+              child: const Text('Log with Additional Data'),
+            ),
             const SizedBox(height: 8),
 
-            ElevatedButton(onPressed: () => _changeLogLevel(), child: const Text('Change Minimum Log Level')),
+            ElevatedButton(
+              onPressed: () => _changeLogLevel(),
+              child: const Text('Change Minimum Log Level'),
+            ),
 
             const SizedBox(height: 20),
             const Divider(),
@@ -120,7 +136,9 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
               'Firebase Status: ${widget.firebaseInitialized ? "Connected" : "Demo Mode"}',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: widget.firebaseInitialized ? Colors.green : Colors.orange,
+                color: widget.firebaseInitialized
+                    ? Colors.green
+                    : Colors.orange,
               ),
             ),
             Text(
@@ -135,7 +153,11 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
             const SizedBox(height: 20),
             const Text(
               'Check your debug console to see the logs in real-time!',
-              style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
+              ),
             ),
           ],
         ),
@@ -176,21 +198,30 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
       } else {
         // Demo mode - just print to console
         final timestamp = DateTime.now().toIso8601String();
-        final logMessage = '[DEMO] [${level.name}] $timestamp${tag != null ? ' [$tag]' : ''}: $message';
+        final logMessage =
+            '[DEMO] [${level.name}] $timestamp${tag != null ? ' [$tag]' : ''}: $message';
         debugPrint(logMessage);
       }
 
       if (mounted) {
-        final status = widget.firebaseInitialized ? 'Logged to Firebase' : 'Logged to Console (Demo Mode)';
+        final status = widget.firebaseInitialized
+            ? 'Logged to Firebase'
+            : 'Logged to Console (Demo Mode)';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$status: ${level.name} - $message'), duration: const Duration(seconds: 2)),
+          SnackBar(
+            content: Text('$status: ${level.name} - $message'),
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error logging message: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error logging message: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -213,22 +244,31 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
       } else {
         // Demo mode - just print to console
         final timestamp = DateTime.now().toIso8601String();
-        final logMessage = '[DEMO] [INFO] $timestamp [USER_ACTION]: User performed action with additional context';
+        final logMessage =
+            '[DEMO] [INFO] $timestamp [USER_ACTION]: User performed action with additional context';
         debugPrint(logMessage);
         debugPrint('Additional Data: $additionalData');
       }
 
       if (mounted) {
-        final status = widget.firebaseInitialized ? 'Logged to Firebase' : 'Logged to Console (Demo Mode)';
+        final status = widget.firebaseInitialized
+            ? 'Logged to Firebase'
+            : 'Logged to Console (Demo Mode)';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$status: Message with additional data'), duration: const Duration(seconds: 2)),
+          SnackBar(
+            content: Text('$status: Message with additional data'),
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error logging message: $e'), backgroundColor: Colors.red));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error logging message: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -237,7 +277,9 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
     if (!widget.firebaseInitialized || !FirebaseLogger.isInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Log level can only be changed when Firebase is connected'),
+          content: Text(
+            'Log level can only be changed when Firebase is connected',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
@@ -258,9 +300,11 @@ class _LoggerDemoPageState extends State<LoggerDemoPage> {
                 FirebaseLogger.setMinimumLevel(level);
                 Navigator.of(context).pop();
                 setState(() {}); // Refresh UI
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Minimum log level set to: ${level.name}')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Minimum log level set to: ${level.name}'),
+                  ),
+                );
               },
             );
           }).toList(),
