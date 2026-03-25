@@ -1,156 +1,242 @@
 # Advanced Firebase Logger
 
-Firebase tabanlı Flutter uygulamaları için geliştirilmiş gelişmiş bir loglama paketi. Bu paket, farklı log seviyelerini destekler ve logları otomatik olarak Firebase Cloud Firestore'a kaydeder.
+Advanced Firebase Logger is a Flutter package that acts as a thin logging layer for app teams who want to write logs from anywhere in their project and persist them in Firebase Cloud Firestore.
 
-## Özellikler
+## What It Solves
 
-- **8 farklı log seviyesi**: FINEST, FINER, FINE, CONFIG, INFO, WARNING, SEVERE, SHOUT
-- **Firebase Cloud Firestore entegrasyonu**: Loglar otomatik olarak Firestore'a kaydedilir
-- **Özelleştirilebilir minimum log seviyesi**: Hangi seviyedeki logların kaydedileceğini belirleyebilirsiniz
-- **Ek veri desteği**: Log mesajlarıyla birlikte ek meta veriler ekleyebilirsiniz
-- **Tag desteği**: Logları kategorilere ayırmak için tag kullanabilirsiniz
-- **Singleton pattern**: Uygulama genelinde tek instance kullanımı
-- **Debug Console Integration**: Loglar hem Firestore'a hem de Flutter debug konsoluna yazılır
+- Lets application code call a single logger from any screen, service, or repository.
+- Adds shared context such as app version, environment, or current user automatically.
+- Writes logs to Firestore while still printing them to the debug console.
+- Supports console-only mode so the same API works even when Firebase is unavailable.
+- Stores errors as structured payloads with exception type and stack trace.
 
-## Başlangıç
+## Features
 
-### Gereksinimler
+- 8 log levels: `FINEST`, `FINER`, `FINE`, `CONFIG`, `INFO`, `WARNING`, `SEVERE`, `SHOUT`
+- Generic `log()` API for dynamic level selection
+- Dedicated `error()` API for exceptions and stack traces
+- Global context and user context management
+- Configurable remote logging and console logging
+- Firestore collection customization
+- Minimum log level filtering
 
-- Flutter SDK
-- Firebase projesi ve Firebase yapılandırması
-- Cloud Firestore etkinleştirilmiş olmalı
+## Installation
 
-### Kurulum
-
-`pubspec.yaml` dosyanıza ekleyin:
+Add the package to your app:
 
 ```yaml
 dependencies:
-  advanced_firebase_logger: ^0.1.0
-  firebase_core: ^3.8.0
-  cloud_firestore: ^5.4.4
+  advanced_firebase_logger: ^0.1.1
+  firebase_core: ^4.6.0
+  cloud_firestore: ^6.2.0
 ```
 
-### Firebase Yapılandırması
-
-1. Firebase Console'da bir proje oluşturun
-2. Flutter uygulamanızı Firebase projesine ekleyin
-3. Cloud Firestore'u etkinleştirin
-4. Firebase yapılandırma dosyalarını projenize ekleyin
-
-## Kullanım
-
-### Başlatma
+## Quick Start
 
 ```dart
+import 'package:advanced_firebase_logger/advanced_firebase_logger.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:advanced_firebase_logger/firebase_logger.dart';
+import 'package:flutter/widgets.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Firebase'i başlat
   await Firebase.initializeApp();
-  
-  // FirebaseLogger'ı başlat
+
   await FirebaseLogger.initialize(
-    collectionName: 'app_logs', // Opsiyonel: varsayılan 'logs'
-    minimumLevel: LogLevel.info, // Opsiyonel: varsayılan LogLevel.info
+    collectionName: 'app_logs',
+    minimumLevel: LogLevel.info,
+    enableConsoleLogging: true,
+    enableRemoteLogging: true,
+    globalContext: <String, dynamic>{
+      'app': 'my_app',
+      'environment': 'production',
+      'appVersion': '1.2.0',
+    },
   );
-  
-  runApp(MyApp());
+
+  FirebaseLogger.setUserContext(<String, dynamic>{
+    'userId': '42',
+    'plan': 'pro',
+  });
+
+  runApp(const MyApp());
 }
 ```
 
-### Temel Kullanım
+## Logging API
+
+### Generic log entry
 
 ```dart
-// Farklı seviyelererde log yazma
-await FirebaseLogger.finest('En detaylı log mesajı');
-await FirebaseLogger.finer('Detaylı log mesajı');
-await FirebaseLogger.fine('Login Successful');
-await FirebaseLogger.config('Yapılandırma değişti');
-await FirebaseLogger.info('Kullanıcı giriş yaptı');
-await FirebaseLogger.warning('Dikkat: Düşük hafıza');
-await FirebaseLogger.severe('Kritik hata oluştu');
-await FirebaseLogger.shout('Acil durum!');
-```
-
-### Ek Verilerle Kullanım
-
-```dart
-// Ek meta verilerle log yazma
-await FirebaseLogger.info(
-  'Kullanıcı profili güncellendi',
-  additionalData: {
-    'userId': '12345',
-    'action': 'profile_update',
-    'timestamp': DateTime.now().millisecondsSinceEpoch,
+await FirebaseLogger.log(
+  LogLevel.info,
+  'Checkout started',
+  tag: 'CHECKOUT',
+  additionalData: <String, dynamic>{
+    'step': 'cart_review',
+    'itemCount': 3,
   },
-  tag: 'USER_MANAGEMENT',
 );
 ```
 
-### Minimum Log Seviyesi Ayarlama
+### Error logging
 
 ```dart
-// Sadece WARNING ve üzeri seviyedeki logları kaydet
-FirebaseLogger.setMinimumLevel(LogLevel.warning);
-
-// Mevcut minimum seviyeyi öğren
-LogLevel currentLevel = FirebaseLogger.getMinimumLevel();
-```
-
-## Log Seviyeleri
-
-| Seviye | Değer | Açıklama |
-|--------|--------|----------|
-| FINEST | 0 | En detaylı debugging bilgileri |
-| FINER | 100 | Detaylı debugging bilgileri |
-| FINE | 200 | Debugging bilgileri |
-| CONFIG | 300 | Yapılandırma bilgileri |
-| INFO | 400 | Genel bilgi mesajları |
-| WARNING | 500 | Uyarı mesajları |
-| SEVERE | 600 | Ciddi hata mesajları |
-| SHOUT | 700 | Kritik/acil durum mesajları |
-
-## Debug Console Integration
-
-Bu paket, logları hem Firebase Firestore'a hem de Flutter debug konsoluna yazdırır. Debug modunda çalışırken, tüm log mesajlarını gerçek zamanlı olarak konsolunuzda görebilirsiniz.
-
-### Debug Console Format
-
-```
-[INFO] 2024-01-15T10:30:45.123Z: Kullanıcı giriş yaptı
-[WARNING] 2024-01-15T10:30:46.456Z [AUTH]: Oturum süresi doldu
-[INFO] 2024-01-15T10:30:47.789Z [USER_ACTION]: Profil güncellendi
-Additional Data: {userId: 12345, action: profile_update}
-```
-
-## Firestore Veri Yapısı
-
-Loglar aşağıdaki yapıda Firestore'a kaydedilir:
-
-```json
-{
-  "timestamp": "Firebase Server Timestamp",
-  "level": "INFO",
-  "levelValue": 400,
-  "message": "Log mesajı",
-  "tag": "Optional tag",
-  "additionalData": { /* Ek veriler */ }
+try {
+  throw StateError('Gateway returned 502');
+} catch (error, stackTrace) {
+  await FirebaseLogger.error(
+    'Payment request failed',
+    tag: 'PAYMENT',
+    error: error,
+    stackTrace: stackTrace,
+    additionalData: <String, dynamic>{
+      'endpoint': '/payments/confirm',
+      'retryable': true,
+    },
+  );
 }
 ```
 
-## Example
+### Convenience level methods
 
-Bu paketin nasıl kullanılacağını görmek için `example/` klasöründeki örnek uygulamayı inceleyebilirsiniz.
+```dart
+await FirebaseLogger.info('User signed in');
+await FirebaseLogger.warning('Refresh token is about to expire');
+await FirebaseLogger.severe('Realtime connection dropped');
+```
 
-### Example'ı Çalıştırma
+## Context Management
 
-**⚠️ IMPORTANT**: Example'ı çalıştırmak için Firebase projesi kurmanız gerekiyor.
+Global context is attached to every log entry.
 
-#### Hızlı Başlangıç
+```dart
+FirebaseLogger.setGlobalContext(<String, dynamic>{
+  'environment': 'staging',
+  'appVersion': '1.2.0',
+});
+
+FirebaseLogger.addGlobalContext(<String, dynamic>{
+  'screen': 'checkout',
+});
+```
+
+User context is also attached automatically and can be updated independently.
+
+```dart
+FirebaseLogger.setUserContext(<String, dynamic>{
+  'userId': '42',
+  'region': 'tr-istanbul',
+});
+
+FirebaseLogger.clearUserContext();
+```
+
+## Demo Mode
+
+If you want to keep the same API when Firebase is unavailable, initialize the package with remote logging disabled.
+
+```dart
+await FirebaseLogger.initialize(
+  enableRemoteLogging: false,
+  enableConsoleLogging: true,
+  globalContext: <String, dynamic>{
+    'environment': 'demo',
+  },
+);
+```
+
+## Runtime Log Management
+
+If you have an admin panel, a feature flag, or a Firestore document that controls logging, update the logger at runtime instead of rebuilding your app.
+
+```dart
+final loggingEnabled = config['loggingEnabled'] as bool;
+final remoteLoggingEnabled = config['remoteLoggingEnabled'] as bool;
+
+FirebaseLogger.updateConfiguration(
+  loggingEnabled: loggingEnabled,
+  remoteLoggingEnabled: remoteLoggingEnabled,
+  minimumLevel: loggingEnabled ? LogLevel.info : LogLevel.shout,
+);
+```
+
+You can also control each part separately:
+
+```dart
+FirebaseLogger.setLoggingEnabled(false);
+FirebaseLogger.setRemoteLoggingEnabled(false);
+FirebaseLogger.setConsoleLoggingEnabled(true);
+```
+
+Recommended production setup:
+
+- `loggingEnabled`: emergency kill switch for all logs
+- `remoteLoggingEnabled`: turn off Firestore writes when volume spikes
+- `consoleLoggingEnabled`: keep local debugging active in development
+- `minimumLevel`: raise to `warning` or `severe` during noisy periods
+
+## Live Configuration Stream
+
+If you want the app to react immediately after `initialize()`, pass a configuration stream to the logger and feed it from Firestore, Remote Config, or your own backend.
+
+```dart
+await FirebaseLogger.initialize(
+  enableRemoteLogging: true,
+  configurationStream: FirebaseFirestore.instance
+      .collection('app_settings')
+      .doc('logger')
+      .snapshots()
+      .map(
+        (snapshot) => FirebaseLoggerConfiguration.fromMap(
+          snapshot.data() ?? const <String, dynamic>{},
+        ),
+      ),
+);
+```
+
+When `loggingEnabled` or `remoteLoggingEnabled` changes in that document, the app applies it immediately without restarting.
+
+## Firestore Document Shape
+
+Each log is stored in Firestore using a structured payload.
+
+```json
+{
+  "timestamp": "Firebase server timestamp",
+  "clientTimestamp": "2026-03-25T10:00:00.000Z",
+  "level": "SEVERE",
+  "levelValue": 600,
+  "message": "Payment request failed",
+  "tag": "PAYMENT",
+  "context": {
+    "app": "my_app",
+    "environment": "production",
+    "userId": "42"
+  },
+  "extras": {
+    "endpoint": "/payments/confirm",
+    "retryable": true
+  },
+  "error": {
+    "message": "Bad state: Gateway returned 502",
+    "type": "StateError",
+    "stackTrace": "..."
+  }
+}
+```
+
+## Example App
+
+The example app demonstrates:
+
+- initializing the package in Firebase mode or demo mode
+- using `log()` instead of `switch`-based level dispatch
+- adding global and user context
+- logging structured errors
+- changing the minimum log level at runtime
+
+Run it with:
 
 ```bash
 cd example
@@ -158,28 +244,16 @@ flutter pub get
 flutter run
 ```
 
-**Not**: Firebase kurulumu yapılmadan example "Demo Mode"da çalışır ve logları sadece debug konsolunda gösterir.
+If Firebase is not configured, the example still works in console-only mode.
 
-#### Tam Firebase Kurulumu
+## Recommendations
 
-Detaylı kurulum rehberi için `example/SETUP.md` dosyasını inceleyin. Bu rehber:
-- Firebase projesi oluşturma
-- Cloud Firestore kurulumu
-- Güvenlik kuralları ayarlama
-- Konfigürasyon dosyalarını ekleme
+- Use `info` and `config` for business events you want to inspect later.
+- Keep `fine`, `finer`, and `finest` mostly for local debugging.
+- Store dynamic event-specific values in `additionalData`.
+- Store stable app and user metadata in global or user context.
+- Avoid writing high-frequency UI events directly to Firestore.
 
-adımlarını içerir.
+## License
 
-### Example Özellikleri
-
-Example uygulaması şunları gösterir:
-- Farklı log seviyelerinin kullanımı
-- Tag ve ek veri desteği
-- Minimum log seviyesi değiştirme
-- Debug konsolunda gerçek zamanlı log görüntüleme
-- Firebase bağlantı durumu göstergesi
-- Demo mode desteği (Firebase olmadan da çalışır)
-
-## Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
+This project is licensed under the MIT License.

@@ -1,60 +1,85 @@
-# Firebase Logger Example - Setup Guide
+# Firebase Logger Example Setup
 
-Bu example'ı çalıştırmak için Firebase projesi kurmanız gerekiyor. Aşağıdaki adımları takip edin:
+This example app uses Firebase Core and Cloud Firestore.
 
-## 🔥 Firebase Projesi Kurulumu
+It expects a real Firebase project and a working FlutterFire configuration. When Firebase is available, the app:
 
-### 1. Firebase Console'da Proje Oluşturma
+- initializes Firebase with `DefaultFirebaseOptions.currentPlatform`
+- auto-creates `app_settings/logger` if it does not exist
+- writes sample logs into `app_logs`
+- reads and applies logger settings from Firestore in real time
 
-1. [Firebase Console](https://console.firebase.google.com/)'a gidin
-2. "Create a project" veya "Proje oluştur" butonuna tıklayın
-3. Proje adını girin (örn: `advanced-firebase-logger-demo`)
-4. Google Analytics'i etkinleştirin (önerilen)
-5. "Create project" ile projeyi oluşturun
+## Current Integration Status
 
-### 2. Flutter Uygulamasını Firebase'e Ekleme
+This example is already structured for FlutterFire.
 
-#### Android için:
-1. Firebase Console'da "Add app" > "Android" seçin
-2. Android package name: `com.example.advancedFirebaseLoggerExample`
-3. App nickname: `Firebase Logger Demo`
-4. `google-services.json` dosyasını indirin
-5. `example/android/app/` klasörüne kopyalayın
+Generated and local Firebase files are expected to live under the `example/` app only.
 
-#### iOS için:
-1. Firebase Console'da "Add app" > "iOS" seçin
-2. iOS bundle ID: `com.example.advancedFirebaseLoggerExample`
-3. App nickname: `Firebase Logger Demo`
-4. `GoogleService-Info.plist` dosyasını indirin
-5. `example/ios/Runner/` klasörüne kopyalayın
+Current active setup assumptions:
 
-#### Web için:
-1. Firebase Console'da "Add app" > "Web" seçin
-2. App nickname: `Firebase Logger Demo`
-3. "Register app" ile devam edin
+- Android, Web, and Windows were configured with FlutterFire CLI
+- `lib/firebase_options.dart` is generated locally
+- Android uses `android/app/google-services.json`
 
-### 3. Cloud Firestore Kurulumu
+## 1. Create Or Open A Firebase Project
 
-1. Firebase Console'da "Firestore Database" seçin
-2. "Create database" ile veritabanı oluşturun
-3. Test mode'da başlatın (güvenlik kurallarını daha sonra ayarlayabilirsiniz)
-4. Location seçin (örn: `europe-west3`)
+1. Open [Firebase Console](https://console.firebase.google.com/)
+2. Create a project or select an existing one
+3. If prompted, enable Google Analytics only if you actually need it
 
-### 4. Güvenlik Kuralları
+## 2. Enable Firestore
 
-Firestore'da "Rules" sekmesinde aşağıdaki kuralları ekleyin:
+1. Open `Build > Firestore Database`
+2. Click `Create database`
+3. Choose `Start in test mode` for local testing, or use your own rules
+4. Choose the Firestore region
 
-```javascript
+If Firestore is not enabled, the example fails with `Cloud Firestore API has not been used in project ... before or it is disabled`.
+
+## 3. Configure FlutterFire
+
+From the `example/` folder, run:
+
+```bash
+dart pub global run flutterfire_cli:flutterfire configure --project=YOUR_PROJECT_ID --platforms=android,web,windows
+```
+
+This generates:
+
+- `lib/firebase_options.dart`
+- Android app registration metadata
+- platform-specific Firebase wiring
+
+For Android, Firebase may also require `android/app/google-services.json` depending on the platform setup and plugins involved.
+
+## 4. Android SHA Fingerprints
+
+For Android registration, add your SHA keys in Firebase Console.
+
+The quickest way to get them is:
+
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+$env:PATH = "$env:JAVA_HOME\bin;" + $env:PATH
+cd example/android
+.\gradlew signingReport
+```
+
+Add the reported `SHA1` and `SHA-256` values to your Android Firebase app settings.
+
+## 5. Firestore Rules For Local Testing
+
+If you want the example to work immediately, allow access to the collections it uses:
+
+```text
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Logs collection - anyone can read/write for demo purposes
-    // In production, add proper authentication and authorization
-    match /logs/{document} {
+    match /app_settings/{document} {
       allow read, write: if true;
     }
-    
-    // App logs collection
+
     match /app_logs/{document} {
       allow read, write: if true;
     }
@@ -62,82 +87,86 @@ service cloud.firestore {
 }
 ```
 
-## 📱 Uygulama Konfigürasyonu
+This is only appropriate for temporary local testing.
 
-### 1. Firebase Options Dosyası
-
-`example/firebase_options_example.dart` dosyasını kopyalayın ve kendi Firebase proje bilgilerinizle güncelleyin:
-
-```bash
-cp example/firebase_options_example.dart example/lib/firebase_options.dart
-```
-
-### 2. Main.dart Güncelleme
-
-`example/lib/main.dart` dosyasında Firebase import'unu aktif edin:
-
-```dart
-import 'firebase_options.dart';
-
-// Firebase.initializeApp() çağrısını güncelleyin:
-await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-```
-
-### 3. Dependencies Kurulumu
+## 6. Install Dependencies
 
 ```bash
 cd example
 flutter pub get
 ```
 
-## 🚀 Uygulamayı Çalıştırma
+## 7. Run The Example
 
-### Android:
+Android:
+
 ```bash
 flutter run -d android
 ```
 
-### iOS:
-```bash
-flutter run -d ios
-```
+Web:
 
-### Web:
 ```bash
 flutter run -d chrome
 ```
 
-## 🔍 Test Etme
+Windows:
 
-1. Uygulama başladığında Firebase bağlantısı kurulacak
-2. "Log INFO", "Log WARNING" gibi butonlara tıklayın
-3. Debug konsolunda logları göreceksiniz
-4. Firebase Console > Firestore Database'de logları kontrol edin
+```bash
+flutter run -d windows
+```
 
-## ❌ Yaygın Hatalar ve Çözümleri
+## 8. Expected Firestore Data
 
-### "Firebase is not initialized" Hatası
-- Firebase konfigürasyon dosyalarının doğru yerde olduğundan emin olun
-- `google-services.json` ve `GoogleService-Info.plist` dosyalarını kontrol edin
+The example uses these paths:
 
-### "Permission denied" Hatası
-- Firestore güvenlik kurallarını kontrol edin
-- Test mode'da olduğundan emin olun
+- `app_settings/logger`
+- `app_logs/*`
 
-### "Network error" Hatası
-- İnternet bağlantınızı kontrol edin
-- Firebase proje ayarlarında domain'in ekli olduğundan emin olun
+On first successful startup, the app attempts to create `app_settings/logger` with default values.
 
-## 📚 Ek Kaynaklar
+## 9. Common Problems
 
-- [Firebase Flutter Setup](https://firebase.flutter.dev/docs/overview/)
-- [Cloud Firestore Documentation](https://firebase.google.com/docs/firestore)
-- [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)
+### Firestore API disabled
 
-## 🔐 Güvenlik Notu
+Symptom:
 
-Bu example test amaçlıdır ve production'da kullanılmamalıdır. Gerçek uygulamalarda:
-- Kullanıcı kimlik doğrulaması ekleyin
-- Firestore güvenlik kurallarını sıkılaştırın
-- API anahtarlarını güvenli tutun
-- Rate limiting uygulayın
+- `Cloud Firestore API has not been used in project ... before or it is disabled`
+
+Fix:
+
+- enable Firestore in Firebase / Google Cloud Console
+
+### Missing permissions
+
+Symptom:
+
+- `[cloud_firestore/permission-denied]`
+- `Missing or insufficient permissions`
+
+Fix:
+
+- publish Firestore rules that allow the example to read and write `app_settings` and `app_logs`
+
+### Firebase locked screen remains visible
+
+Symptom:
+
+- the app stays in locked mode
+
+Fix:
+
+- verify `lib/firebase_options.dart` exists
+- verify Firestore is enabled
+- verify Firestore rules allow reads for `app_settings/logger`
+
+## 10. Security Note
+
+Do not use the permissive rules above in production.
+
+For real apps, you should:
+
+- require authentication
+- scope writes by user or service role
+- restrict what can be updated in `app_settings`
+- validate log payload structure

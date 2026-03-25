@@ -1,3 +1,23 @@
+## 0.2.0
+
+### Added
+* Added a generic logging API with `log()` and structured `error()` support.
+* Added runtime logger configuration controls for enabling or disabling all logging, console logging, and remote logging independently.
+* Added live configuration stream support so apps can react immediately to remote logger setting changes.
+* Added global context and user context helpers for richer log payloads.
+* Added writer injection and payload helpers to simplify testing and custom sink integrations.
+* Added a multi-screen example app with log writing, Firestore log viewing, and runtime management screens.
+* Added Firebase bootstrap integration for the example app using generated FlutterFire options.
+
+### Changed
+* Refactored the example app into a clearer multi-file structure.
+* Updated the example setup guide to the current FlutterFire and Firestore workflow.
+* Improved package tests to cover configuration changes, runtime toggles, payload generation, and structured error logging.
+
+### Fixed
+* Fixed initialization behavior when using a custom writer without a real Firebase app instance.
+* Fixed example bootstrap flow to stay locked only when Firebase or Firestore access is actually unavailable.
+
 ## 0.1.1
 
 ### 🔧 Hata Düzeltmeleri
